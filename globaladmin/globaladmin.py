@@ -14,6 +14,7 @@ logger = logging.getLogger('red.core-cogs.globaladmin')
 
 class GlobalAdmin(commands.Cog):
     """Set up authentication for admins for other cogs via tsutils"""
+
     def __init__(self, bot, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.bot = bot
@@ -44,6 +45,7 @@ class GlobalAdmin(commands.Cog):
         Cogs automatically register their perms with gadmin; you don't need to add them"""
 
     def register_perm(self, perm_name, default=False):
+        assert perm_name != 'all'
         self.settings.add_perm(perm_name, default)
 
     @perms.command()
@@ -75,7 +77,10 @@ class GlobalAdmin(commands.Cog):
 
     @globaladmin.command(aliases=["setperm", "setadmin", "addadmin", "addperm"])
     async def grant(self, ctx, user: discord.User, perm, value: bool = True):
-        """Grant a user a perm"""
+        """Grant a user a perm
+
+        If perm is 'all', it will grant all permissions.
+        """
         if self.settings.add_user_perm(user.id, perm, value):
             await ctx.send(inline("Invalid perm name."))
             return
@@ -83,7 +88,10 @@ class GlobalAdmin(commands.Cog):
 
     @globaladmin.command()
     async def deny(self, ctx, user: discord.User, perm, value: bool = False):
-        """Deny a user a perm"""
+        """Deny a user a perm
+
+        If perm is 'all', it will deny all permissions.
+        """
         if self.settings.add_user_perm(user.id, perm, value):
             await ctx.send(inline("Invalid perm name."))
             return
@@ -98,7 +106,7 @@ class GlobalAdmin(commands.Cog):
             await ctx.send(inline("No users have this perm."))
         for page in pagify("\n".join(us)):
             await ctx.send(box(page))
-            
+
     def auth_check(self, user: Union[Object, User], perm_name: str, default: bool = False) -> bool:
         return self.settings.get_perm(user.id, perm_name, default=default)
 
@@ -112,11 +120,15 @@ class GlobalAdminSettings(CogSettings):
         return config
 
     def add_user_perm(self, user_id, perm, value=True):
-        if perm not in self.bot_settings['perms']:
+        if perm not in (*self.bot_settings['perms'], 'all'):
             return -1
         if user_id not in self.bot_settings['users']:
             self.bot_settings['users'][user_id] = {}
-        self.bot_settings['users'][user_id][perm] = value
+        if perm == 'all':
+            for perm in self.bot_settings['users'][user_id]:
+                self.bot_settings['users'][user_id][perm] = value
+        else:
+            self.bot_settings['users'][user_id][perm] = value
         self.save_settings()
 
     def add_perm(self, perm, default=False):
