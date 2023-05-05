@@ -1,9 +1,8 @@
 import logging
-import os.path
 import zipfile
 from collections import defaultdict
 from io import BytesIO
-from typing import Awaitable, Callable
+from typing import Any, Callable, Coroutine
 
 import discord
 from redbot.core import Config, checks, commands
@@ -21,7 +20,7 @@ EP_STATUS = {
 }
 
 
-def has_status(status) -> Callable[[Context], Awaitable[bool]]:
+def has_status(status) -> Callable[[Context], Coroutine[Any, Any, bool]]:
     """Check if a user is of a status"""
 
     async def decorator(ctx):
@@ -64,7 +63,7 @@ class EmojiServer(commands.Cog):
         """Add an emoji server"""
         async with self.config.emojiservers() as ess:
             for sid in server_ids:
-                if self.bot.get_guild(sid) is None:
+                if (s := self.bot.get_guild(sid)) is None:
                     await ctx.send(f"Server '{sid}' not found.")
                 elif sid in ess:
                     await ctx.send(f"{s.name} is already an emoji server.")
@@ -225,7 +224,7 @@ class EmojiServer(commands.Cog):
                     elif len(guild.emojis) + len(fns[folder]) > guild.emoji_limit:
                         problems.append(f"Not enough emoji spots in server {guild.name} ({guild.id})")
                 if problems:
-                    for page in pagify("Problems:\n"+'\n'.join(problems)):
+                    for page in pagify("Problems:\n" + '\n'.join(problems)):
                         await ctx.send(box(page))
                     return await ctx.react_quietly("\N{CROSS MARK}")
                 for foldername in fns:

@@ -1,13 +1,12 @@
 import codecs
 import pickle
+import pytz
 import re
 from datetime import datetime, timedelta, timezone, tzinfo
-from typing import Optional
-
-import pytz
 from discord import User
 from redbot.core import Config
 from tsutils.cog_mixins import CogMixin, mixin_group
+from typing import Optional
 
 
 class TimezonePreference(CogMixin):
@@ -22,7 +21,7 @@ class TimezonePreference(CogMixin):
             return f"Timezone: `{pickle.loads(tz)}`"
 
     async def red_delete_data_for_user(self, *, requester, user_id):
-        await self.config.user_from_id(user_id).timezone.set(None)
+        await self.config.user_from_id(user_id).timezoneaio.set(None)
 
     @mixin_group('preferences', aliases=['tz'], invoke_without_command=True)
     async def timezone(self, ctx, *, tzstr):
@@ -66,7 +65,7 @@ class TimezonePreference(CogMixin):
                 return pytz.timezone(tz)
 
     def encode_timezone(self, tz: tzinfo) -> str:
-        return codecs.encode(pickle.dumps(tz), 'base64').decode('utf-8')
+        return codecs.encode(pickle.dumps(tz).decode('utf-8'), 'base64').decode('utf-8')
 
     def decode_timezone(self, data: str) -> tzinfo:
         return pickle.loads(codecs.decode(data.encode('utf-8'), 'base64'))
