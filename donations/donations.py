@@ -1,12 +1,12 @@
-import discord
 import json
 import random
 import re
 from io import BytesIO
-from redbot.core import checks
-from redbot.core import commands
+
+import discord
+from redbot.core import checks, commands
 from redbot.core.bot import Red
-from redbot.core.utils.chat_formatting import box, inline, escape
+from redbot.core.utils.chat_formatting import box, escape, inline
 from tsutils.cog_settings import CogSettings
 from tsutils.cogs.donations import is_donor
 
@@ -262,7 +262,7 @@ class Donations(commands.Cog):
         prefix = (await self.bot.get_prefix(message))[0]
 
         user_id = message.author.id
-        if user_id not in self.bot.owner_ids.union(
+        if user_id not in set(self.bot.owner_ids).union(
                 user.id for user in self.support_guild.members
                 if self.donor_role in user.roles or self.patron_role in user.roles):
             return
