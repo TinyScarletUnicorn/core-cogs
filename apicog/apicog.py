@@ -66,9 +66,14 @@ class APICog(commands.Cog):
                                         status=400)
 
         status = 200
-        response = function(**qps)
-        if inspect.isawaitable(response):
-            response = await response
+
+        try:
+            response = function(**qps)
+            if inspect.isawaitable(response):
+                response = await response
+        except Exception as e:
+            return web.Response(text=str(e), status=400)
+
         if isinstance(response, dict):
             if 'response' in response:
                 status = response.get('status', 200)
