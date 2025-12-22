@@ -11,6 +11,7 @@ class APICog(commands.Cog):
         self.bot = bot
 
         self.config = Config.get_conf(self, identifier=3260)
+        self.config.register_global(port=80)
         self.config.init_custom("Endpoint", 1)
         self.config.register_custom("Endpoint", cog=None, function_name=None)
 
@@ -26,7 +27,7 @@ class APICog(commands.Cog):
 
         self.runner = web.AppRunner(app, access_log=None)
         await self.runner.setup()
-        self.site = web.TCPSite(self.runner, '0.0.0.0', 8080)
+        self.site = web.TCPSite(self.runner, '0.0.0.0', await self.config.port())
         await self.site.start()
 
     async def cog_unload(self):
@@ -36,7 +37,7 @@ class APICog(commands.Cog):
             await self.runner.cleanup()
 
     async def root_handler(self, request):
-        return web.Response(text=f"I am alive! Logged in as {self.bot.user}")
+        return web.Response(text=f"Maybe put something here eventually...")
 
     async def dynamic_handler(self, request):
         endpoint_name = request.match_info['endpoint_name']
