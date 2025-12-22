@@ -4,7 +4,7 @@
   ],
   "description": "Sets up the API.",
   "end_user_data_statement": "No personal data is stored.",
-  "install_msg": "APICog installed.",
+  "install_msg": "APICog installed. Don't use this unless you know what you're doing.",
   "short": "API base",
   "min_bot_version": "3.4.0",
   "max_bot_version": "0.0.0",
