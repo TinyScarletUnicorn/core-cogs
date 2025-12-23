@@ -24,7 +24,7 @@ class APICog(commands.Cog):
 
         # 2. Add your routes
         app.router.add_get('/', self.root_handler)
-        app.router.add_get('/{endpoint_name}', self.dynamic_handler)
+        app.router.add_get('/{endpoint_name:.+}', self.dynamic_handler)
 
         ssl_context = None
         if await self.config.certfile() is not None:
