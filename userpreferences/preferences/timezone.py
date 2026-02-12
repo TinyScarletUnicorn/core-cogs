@@ -65,7 +65,7 @@ class TimezonePreference(CogMixin):
                 return pytz.timezone(tz)
 
     def encode_timezone(self, tz: tzinfo) -> str:
-        return codecs.encode(pickle.dumps(tz).decode('utf-8'), 'base64').decode('utf-8')
+        return codecs.encode(pickle.dumps(tz), 'base64').decode('utf-8')
 
     def decode_timezone(self, data: str) -> tzinfo:
         return pickle.loads(codecs.decode(data.encode('utf-8'), 'base64'))

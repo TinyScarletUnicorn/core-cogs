@@ -68,10 +68,15 @@ class APICog(commands.Cog):
         qps = request.query.copy()
 
         for name, param in inspect.signature(function).parameters.items():
+            if name == 'request':
+                qps['request'] = request
+                continue
+
             if name not in qps:
                 if param.default is not inspect.Parameter.empty:
                     continue
                 return web.Response(text=f"Parameter '{name}' is required.", status=400)
+
             if param.annotation is not inspect.Parameter.empty:
                 try:
                     qps[name] = param.annotation(qps[name])
@@ -79,7 +84,9 @@ class APICog(commands.Cog):
                     return web.Response(text=f"Parameter '{name}' must be a(n) {param.annotation.__name__}.",
                                         status=400)
 
-        status = 200
+        for qp in qps.copy().keys():
+            if qp not in inspect.signature(function).parameters:
+                del qps[qp]
 
         try:
             response = function(**qps)
@@ -88,6 +95,7 @@ class APICog(commands.Cog):
         except Exception as e:
             return web.Response(text=str(e), status=400)
 
+        status = 200
         if isinstance(response, dict):
             if 'response' in response:
                 status = response.get('status', 200)
@@ -141,20 +149,24 @@ class APICog(commands.Cog):
     @api.group()
     @commands.is_owner()
     async def setup(self, ctx):
+        """Sets up the port and SSL info of the API"""
         ...
 
     @setup.command()
     async def setport(self, ctx, port: int):
+        """Set the port for the API"""
         await self.config.port.set(port)
         await ctx.tick()
 
     @setup.command()
     async def setcertfile(self, ctx, certfile):
+        """Set the certfile for the API"""
         await self.config.certfile.set(certfile)
         await ctx.tick()
 
     @setup.command()
     async def setkeyfile(self, ctx, keyfile):
+        """Set the keyfile for the API"""
         await self.config.keyfile.set(keyfile)
         await ctx.tick()
 
